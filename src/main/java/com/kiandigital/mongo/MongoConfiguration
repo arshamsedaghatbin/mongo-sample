@@ -1,4 +1,4 @@
-package com.kian.txmanager.config;
+package com.kiandigital.mongo;
 
 import com.kian.txmanager.web.rest.util.JacksonMongoConverter;
 import com.mongodb.Mongo;
