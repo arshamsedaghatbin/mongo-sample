@@ -1,0 +1,67 @@
+package com.kian.txmanager.config;
+
+import com.kian.txmanager.web.rest.util.JacksonMongoConverter;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
+import org.springframework.data.mongodb.core.convert.DbRefResolver;
+import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+
+import java.util.Collections;
+import java.util.List;
+
+@Configuration
+public class MongoConfiguration extends AbstractMongoConfiguration {
+
+    @Value("${mongodb.host}")
+    private String host;
+
+    @Value("${mongodb.db}")
+    private String databaseName;
+
+    @Value("${mongodb.port}")
+    private int port;
+
+    @Value("${mongodb.user}")
+    private String user;
+
+    @Value("${mongodb.passwd}")
+    private char[] passwd;
+
+
+    @Override
+    protected String getDatabaseName() {
+        return databaseName;
+    }
+
+    @Override
+    public Mongo mongo() throws Exception {
+        ServerAddress serverAddress = new ServerAddress(host, port);
+        List<MongoCredential> credentials = Collections.singletonList(
+                MongoCredential.createCredential(user, databaseName, passwd)
+        );
+
+        MongoClient mongoClient = new MongoClient(serverAddress, credentials);
+        return mongoClient;
+    }
+
+    @Override
+    public MappingMongoConverter mappingMongoConverter() throws Exception {
+        DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoDbFactory());
+        MappingMongoConverter converter = new JacksonMongoConverter(dbRefResolver, mongoMappingContext());
+
+        return converter;
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+        return new PropertySourcesPlaceholderConfigurer();
+    }
+}
